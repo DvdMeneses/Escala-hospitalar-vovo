@@ -223,6 +223,24 @@ button svg {
   animation: pulse 1.5s infinite;
 }
 
+.btn-exportar {
+  background-color: #22c55e;
+  color: white;
+  font-weight: 600;
+  font-size: 0.9rem;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s, box-shadow 0.3s;
+}
+
+.btn-exportar:hover {
+  background-color: #16a34a;
+  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.4);
+}
+
+
 @keyframes pulse {
   0% {
     box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.4);

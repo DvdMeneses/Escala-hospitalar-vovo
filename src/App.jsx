@@ -1,5 +1,8 @@
 import { useState, useEffect } from 'react';
 import './App.css';
+import { ref, onValue, set } from "firebase/database";
+import { database } from "./firebase";
+import html2canvas from 'html2canvas';
 
 const dias = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo'];
 const horas = Array.from({ length: 24 }, (_, i) => `${i.toString().padStart(2, '0')}:00`);
@@ -18,10 +21,13 @@ function App() {
   const [escala, setEscala] = useState({});
 
   useEffect(() => {
-    const saved = localStorage.getItem('escala-horarios');
-    if (saved) {
-      setEscala(JSON.parse(saved));
-    }
+    const escalaRef = ref(database, "escala");
+    onValue(escalaRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        setEscala(data);
+      }
+    });
   }, []);
 
   const capitalizarNome = (nome) => {
@@ -31,13 +37,28 @@ function App() {
       .replace(/(?:^|\s)\S/g, (letra) => letra.toUpperCase());
   };
 
+  const exportarComoImagem = () => {
+    const tabela = document.querySelector('.tabela-scroll');
+    if (!tabela) return;
+
+    html2canvas(tabela, {
+      scale: 2,
+      backgroundColor: '#ffffff',
+    }).then((canvas) => {
+      const link = document.createElement('a');
+      link.download = 'escala-vovo.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    });
+  };
+
   const salvarEscala = (dia, hora) => {
     const nomeDigitado = prompt(`Quem estará disponível em ${dia} às ${hora}?`);
     if (nomeDigitado) {
       const nome = capitalizarNome(nomeDigitado);
       const novaEscala = { ...escala, [`${dia}_${hora}`]: nome };
       setEscala(novaEscala);
-      localStorage.setItem('escala-horarios', JSON.stringify(novaEscala));
+      set(ref(database, "escala"), novaEscala);
     }
   };
 
@@ -72,7 +93,7 @@ function App() {
     }
 
     setEscala(novaEscala);
-    localStorage.setItem('escala-horarios', JSON.stringify(novaEscala));
+    set(ref(database, "escala"), novaEscala);
   };
 
   const getCor = (nome) => cores[nome] || '#e5e7eb';
@@ -80,6 +101,11 @@ function App() {
   return (
     <div className="container">
       <h1>Escala Hospitalar da Vovó</h1>
+      <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+        <button onClick={exportarComoImagem} className="btn-exportar">
+          📸 Exportar Escala como Imagem
+        </button>
+      </div>
       <div className="tabela-scroll">
         <table>
           <thead>
