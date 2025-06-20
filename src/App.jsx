@@ -17,6 +17,7 @@ function App() {
   const [diaSelecionado, setDiaSelecionado] = useState('');
   const [modalCelulaAberto, setModalCelulaAberto] = useState(false);
   const [celulaSelecionada, setCelulaSelecionada] = useState({ dia: '', hora: '' });
+  const [hoveredCell, setHoveredCell] = useState(null);
 
   useEffect(() => {
     // Carregar escala
@@ -116,6 +117,14 @@ function App() {
       .catch(error => alert('Erro ao salvar acompanhante: ' + error.message));
   };
 
+  const removerAcompanhante = (dia, hora) => {
+    const novaEscala = { ...escala };
+    delete novaEscala[`${dia}_${hora}`];
+    setEscala(novaEscala);
+    set(ref(database, "escala"), novaEscala);
+    setHoveredCell(null);
+  };
+
   return (
     <div className="container">
       <h1>Escala Hospitalar da Vovó</h1>
@@ -165,10 +174,25 @@ function App() {
                         backgroundColor: nome ? getCor(nome) : '#fff',
                         color: nome ? '#fff' : '#000',
                         cursor: 'pointer',
+                        position: 'relative'
                       }}
-                      onClick={() => abrirModalCelula(dia, hora)}  // Atualizado para abrirModalCelula
+                      onClick={() => abrirModalCelula(dia, hora)}
+                      onMouseEnter={() => setHoveredCell(nome ? key : null)}
+                      onMouseLeave={() => setHoveredCell(null)}
                     >
                       {nome}
+                      {hoveredCell === key && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            removerAcompanhante(dia, hora);
+                          }}
+                          className="btn-remover"
+                          title="Remover acompanhante"
+                        >
+                          ×
+                        </button>
+                      )}
                     </td>
                   );
                 })}

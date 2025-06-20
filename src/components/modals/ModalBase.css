@@ -234,11 +234,40 @@
 
 /* Estilo específico para botão de limpar (usado no EditarCelulaModal) */
 .modal .btn-limpar {
-    background-color: #f44336 !important;
-    color: white !important;
+    background-color: #f44336;
+    color: white;
     margin-left: 10px;
 }
 
 .modal .btn-limpar:hover {
-    background-color: #d32f2f !important;
+    background-color: #d32f2f;
+}
+
+.btn-remover {
+    position: absolute;
+    top: 20%;
+    right: 3px;
+    transform: translateY(-50%);
+    background-color: rgba(255, 255, 255, 0.9);
+    border: 1px solid #f44336;
+    color: #f44336;
+    font-weight: bold;
+    font-size: 10px;
+    width: 15px;
+    height: 15px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.1s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    outline: none;
+}
+
+.btn-remover:hover {
+    background-color: #f44336;
+    color: #fff;
+    transform: translateY(-50%) scale(1.1);
+    box-shadow: 0 4px 8px rgba(244, 67, 54, 0.4);
+    outline: none;
 }

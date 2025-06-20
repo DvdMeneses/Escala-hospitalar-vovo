@@ -7,11 +7,10 @@ const EditarCelulaModal = ({ aberto, onCancelar, onSalvar, dia, hora, acompanhan
 
     useEffect(() => {
         if (aberto) {
-            // Extrai os nomes dos acompanhantes quando o modal abre
             if (acompanhantes) {
                 const nomes = Object.values(acompanhantes).map(a => a.nome);
                 setNomesAcompanhantes(nomes);
-                setNomeSelecionado(nomeAtual || (nomes.length > 0 ? nomes[0] : ''));
+                setNomeSelecionado(nomeAtual || '');
             }
         }
     }, [aberto, acompanhantes, nomeAtual]);
@@ -21,7 +20,6 @@ const EditarCelulaModal = ({ aberto, onCancelar, onSalvar, dia, hora, acompanhan
             alert('Selecione um acompanhante.');
             return;
         }
-
         onSalvar({ dia, hora, nome: nomeSelecionado });
     };
 
@@ -53,13 +51,23 @@ const EditarCelulaModal = ({ aberto, onCancelar, onSalvar, dia, hora, acompanhan
 
                 <div className="botoes">
                     <button onClick={onCancelar}>Cancelar</button>
-                    <button onClick={handleSalvar}>Salvar</button>
                     <button
-                        onClick={() => onSalvar({ dia, hora, nome: '' })}
-                        style={{ backgroundColor: '#f44336', marginLeft: '10px' }}
+                        onClick={handleSalvar}
+                        disabled={!nomeSelecionado}
                     >
-                        Limpar
+                        Salvar
                     </button>
+                    {nomeAtual && (
+                        <button
+                            onClick={() => {
+                                onSalvar({ dia, hora, nome: '' });
+                                onCancelar();
+                            }}
+                            className="btn-limpar"
+                        >
+                            Remover
+                        </button>
+                    )}
                 </div>
             </div>
         </div>
