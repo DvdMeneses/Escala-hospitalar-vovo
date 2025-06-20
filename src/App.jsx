@@ -3,8 +3,8 @@ import './App.css';
 import { ref, onValue, set } from "firebase/database";
 import { database } from "./firebase";
 import html2canvas from 'html2canvas';
-
-import CadastrarAcompanhanteModal from './components/CadastrarAcompanhanteModal';
+import CadastrarIntervaloModal from './components/cadastrarIntervaloModal/CadastrarIntervaloModal';
+import CadastrarAcompanhanteModal from './components/cadastrarAcompanhante/CadastrarAcompanhanteModal';
 
 const dias = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo'];
 const horas = Array.from({ length: 24 }, (_, i) => `${i.toString().padStart(2, '0')}:00`);
@@ -23,6 +23,8 @@ function App() {
   const [escala, setEscala] = useState({});
   const [acompanhantes, setAcompanhantes] = useState({});
   const [modalAberto, setModalAberto] = useState(false);
+  const [modalIntervaloAberto, setModalIntervaloAberto] = useState(false);
+  const [diaSelecionado, setDiaSelecionado] = useState('');
 
   useEffect(() => {
     // Carregar escala
@@ -72,45 +74,32 @@ function App() {
     }
   };
 
-  const cadastrarIntervalo = (dia) => {
-    const intervalo = prompt(`Informe o intervalo para ${dia} no formato HH-HH (ex: 07-18):`);
-    if (!intervalo) return;
-
-    const match = intervalo.match(/^(\d{1,2})-(\d{1,2})$/);
-    if (!match) {
-      alert('Formato inválido. Use HH-HH, ex: 07-18');
-      return;
-    }
-
-    let [_, inicioStr, fimStr] = match;
-    let inicio = parseInt(inicioStr, 10);
-    let fim = parseInt(fimStr, 10);
-
-    if (inicio < 0 || inicio > 23 || fim < 0 || fim > 23 || inicio > fim) {
-      alert('Intervalo inválido. Horas devem estar entre 0 e 23, e início <= fim.');
-      return;
-    }
-
-    const nomeDigitado = prompt(`Quem estará disponível em ${dia} das ${inicio.toString().padStart(2, '0')}:00 às ${fim.toString().padStart(2, '0')}:00?`);
-    if (!nomeDigitado) return;
-
-    const nome = capitalizarNome(nomeDigitado);
-
-    const novaEscala = { ...escala };
-    for (let h = inicio; h <= fim; h++) {
-      const horaFormatada = `${h.toString().padStart(2, '0')}:00`;
-      novaEscala[`${dia}_${horaFormatada}`] = nome;
-    }
-
-    setEscala(novaEscala);
-    set(ref(database, "escala"), novaEscala);
-  };
-
-
   // Modal handlers
   const abrirModal = () => setModalAberto(true);
   const fecharModal = () => setModalAberto(false);
 
+  const abrirModalIntervalo = (dia) => {
+    setDiaSelecionado(dia);
+    setModalIntervaloAberto(true);
+  };
+
+  const fecharModalIntervalo = () => {
+    setModalIntervaloAberto(false);
+  };
+
+  const salvarIntervalo = ({ dia, inicio, fim, nome }) => {
+    const nomeCapitalizado = capitalizarNome(nome);
+    const novaEscala = { ...escala };
+
+    for (let h = inicio; h <= fim; h++) {
+      const horaFormatada = `${h.toString().padStart(2, '0')}:00`;
+      novaEscala[`${dia}_${horaFormatada}`] = nomeCapitalizado;
+    }
+
+    setEscala(novaEscala);
+    set(ref(database, "escala"), novaEscala);
+    fecharModalIntervalo();
+  };
 
   const getCor = (nome) => {
     const encontrados = Object.values(acompanhantes).find(a => a.nome === nome);
@@ -158,7 +147,7 @@ function App() {
                   {dia}{' '}
                   <button
                     style={{ marginLeft: 8, padding: '2px 6px', fontSize: '0.7rem' }}
-                    onClick={() => cadastrarIntervalo(dia)}
+                    onClick={() => abrirModalIntervalo(dia)}
                     title={`Cadastrar intervalo de horários para ${dia}`}
                   >
                     + Cadastrar intervalo
@@ -198,6 +187,13 @@ function App() {
         aberto={modalAberto}
         onCancelar={fecharModal}
         onSalvar={salvarAcompanhante}
+      />
+      <CadastrarIntervaloModal
+        aberto={modalIntervaloAberto}
+        onCancelar={fecharModalIntervalo}
+        onSalvar={salvarIntervalo}
+        dia={diaSelecionado}
+        acompanhantes={acompanhantes}
       />
     </div>
   );
