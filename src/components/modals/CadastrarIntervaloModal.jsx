@@ -1,11 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import './ModalBase.css';  // Todos importam o mesmo CSS
+import './ModalBase.css';
 
 const CadastrarIntervaloModal = ({ aberto, onCancelar, onSalvar, dia, acompanhantes }) => {
     const [inicio, setInicio] = useState('');
     const [fim, setFim] = useState('');
     const [nomeSelecionado, setNomeSelecionado] = useState('');
     const [nomesAcompanhantes, setNomesAcompanhantes] = useState([]);
+
+    // Gerar array de horários no formato HH:00
+    const horarios = Array.from({ length: 24 }, (_, i) =>
+        `${i.toString().padStart(2, '0')}:00`
+    );
 
     useEffect(() => {
         if (aberto) {
@@ -29,12 +34,12 @@ const CadastrarIntervaloModal = ({ aberto, onCancelar, onSalvar, dia, acompanhan
             return;
         }
 
-        const inicioNum = parseInt(inicio);
-        const fimNum = parseInt(fim);
+        // Extrai apenas a hora (número) do formato HH:00
+        const inicioNum = parseInt(inicio.split(':')[0]);
+        const fimNum = parseInt(fim.split(':')[0]);
 
-        if (isNaN(inicioNum) || isNaN(fimNum) ||
-            inicioNum < 0 || fimNum > 23 || inicioNum > fimNum) {
-            alert('Intervalo inválido. Use horas entre 0 e 23, com início <= fim.');
+        if (inicioNum > fimNum) {
+            alert('Horário final deve ser após o horário inicial.');
             return;
         }
 
@@ -52,38 +57,50 @@ const CadastrarIntervaloModal = ({ aberto, onCancelar, onSalvar, dia, acompanhan
                 </p>
 
                 <div className="form-group">
-                    <label>Hora Início (0 a 23):</label>
-                    <input
-                        type="number"
+                    <label>Hora Início:</label>
+                    <select
                         value={inicio}
                         onChange={e => setInicio(e.target.value)}
-                        min="0"
-                        max="23"
-                        placeholder="Ex: 7"
-                    />
+                        className="combo-box"
+                    >
+                        <option value="">Selecione...</option>
+                        {horarios.map((hora, index) => (
+                            <option key={`inicio-${index}`} value={hora}>
+                                {hora}
+                            </option>
+                        ))}
+                    </select>
                 </div>
 
                 <div className="form-group">
-                    <label>Hora Fim (0 a 23):</label>
-                    <input
-                        type="number"
+                    <label>Hora Fim:</label>
+                    <select
                         value={fim}
                         onChange={e => setFim(e.target.value)}
-                        min="0"
-                        max="23"
-                        placeholder="Ex: 18"
-                    />
+                        className="combo-box"
+                        disabled={!inicio}
+                    >
+                        <option value="">Selecione...</option>
+                        {horarios
+                            .filter(hora => !inicio || hora >= inicio)
+                            .map((hora, index) => (
+                                <option key={`fim-${index}`} value={hora}>
+                                    {hora}
+                                </option>
+                            ))
+                        }
+                    </select>
                 </div>
 
                 <div className="form-group">
-                    <label>Nome do Acompanhante:</label>
+                    <label>Acompanhante:</label>
                     <select
                         value={nomeSelecionado}
                         onChange={e => setNomeSelecionado(e.target.value)}
                         className="combo-box"
                     >
                         {nomesAcompanhantes.map((nome, index) => (
-                            <option key={index} value={nome}>
+                            <option key={`acomp-${index}`} value={nome}>
                                 {nome}
                             </option>
                         ))}
@@ -92,7 +109,12 @@ const CadastrarIntervaloModal = ({ aberto, onCancelar, onSalvar, dia, acompanhan
 
                 <div className="botoes">
                     <button onClick={onCancelar}>Cancelar</button>
-                    <button onClick={handleSalvar}>Salvar</button>
+                    <button
+                        onClick={handleSalvar}
+                        disabled={!inicio || !fim || !nomeSelecionado}
+                    >
+                        Salvar
+                    </button>
                 </div>
             </div>
         </div>
