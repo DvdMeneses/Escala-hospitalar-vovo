@@ -62,7 +62,7 @@ function App() {
     }
   };
 
-  const salvarFaixa = (dia) => {
+  const cadastrarIntervalo = (dia) => {
     const intervalo = prompt(`Informe o intervalo para ${dia} no formato HH-HH (ex: 07-18):`);
     if (!intervalo) return;
 
@@ -116,10 +116,10 @@ function App() {
                   {dia}{' '}
                   <button
                     style={{ marginLeft: 8, padding: '2px 6px', fontSize: '0.7rem' }}
-                    onClick={() => salvarFaixa(dia)}
-                    title={`Preencher faixa de horários para ${dia}`}
+                    onClick={() => cadastrarIntervalo(dia)}
+                    title={`Cadastrar intervalo de horários para ${dia}`}
                   >
-                    + Faixa
+                    + Cadastrar intervalo
                   </button>
                 </th>
               ))}
