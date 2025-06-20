@@ -148,7 +148,7 @@ function App() {
         </button>
       </div>
 
-      <div className="tabela-scroll">
+      <div className="tabela-scroll" style={{ overflowX: '50%', width: '100%' }}>
         <table>
           <thead>
             <tr>

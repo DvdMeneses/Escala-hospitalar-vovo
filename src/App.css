@@ -62,37 +62,21 @@ h1::after {
 
 .tabela-scroll {
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  width: 100%;
+  max-width: 100vw;
+  margin: 20px 0;
   border-radius: var(--border-radius);
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border-color);
   box-shadow: var(--shadow-sm);
-  padding-bottom: 10px;
-  scrollbar-width: thin;
-  scrollbar-color: var(--primary-color) #e2e8f0;
-  margin-top: 30px;
-  position: relative;
-}
-
-.tabela-scroll::-webkit-scrollbar {
-  height: 8px;
-}
-
-.tabela-scroll::-webkit-scrollbar-track {
-  background: #e2e8f0;
-  border-radius: 8px;
-}
-
-.tabela-scroll::-webkit-scrollbar-thumb {
-  background-color: var(--primary-color);
-  border-radius: 8px;
-  border: 2px solid #e2e8f0;
 }
 
 table {
-  width: 100%;
+  width: auto;
+  min-width: 100%;
   border-collapse: separate;
   border-spacing: 0;
-  font-size: 0.95rem;
-  min-width: 900px;
+  font-size: 0.9rem;
 }
 
 thead {
@@ -261,40 +245,6 @@ button svg {
   }
 }
 
-@media (max-width: 768px) {
-  body {
-    padding: 10px;
-    align-items: flex-start;
-  }
-
-  .container {
-    padding: 25px;
-    width: calc(100% - 20px);
-  }
-}
-
-@media (max-width: 768px) {
-  .container {
-    padding: 25px;
-    margin: 20px 10px;
-  }
-
-  h1 {
-    font-size: 1.8rem;
-    margin-bottom: 30px;
-  }
-
-  th,
-  td {
-    padding: 10px 12px;
-    font-size: 0.85rem;
-  }
-
-  button {
-    font-size: 0.75rem;
-    padding: 5px 10px;
-  }
-}
 
 [role="button"],
 button {
@@ -318,4 +268,84 @@ td {
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 120px;
+}
+
+@media (max-width: 768px) {
+  body {
+    padding: 0;
+    align-items: flex-start;
+  }
+
+  .container {
+    padding: 12px 8px;
+    width: 100%;
+    margin: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  h1 {
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+  }
+
+  h1::after {
+    width: 60px;
+    height: 3px;
+  }
+
+  .tabela-scroll {
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+    margin: 10px -8px;
+  }
+
+  table {
+    font-size: 0.8rem;
+  }
+
+  th,
+  td {
+    padding: 8px 6px;
+    min-width: 60px;
+  }
+
+  th:first-child,
+  td:first-child {
+    position: sticky;
+    left: 0;
+    z-index: 10;
+  }
+
+  th:first-child {
+    border-top-left-radius: 0;
+  }
+
+  button {
+    font-size: 0.7rem;
+    padding: 4px 8px;
+  }
+
+  .btn-exportar,
+  .btn-cadastrar-acompanhante {
+    width: 100%;
+    margin: 5px 0;
+    padding: 8px 12px;
+  }
+}
+
+/* Ajustes para telas muito pequenas */
+@media (max-width: 480px) {
+
+  th,
+  td {
+    padding: 6px 4px;
+    font-size: 0.7rem;
+  }
+
+  .hora {
+    font-size: 0.65rem;
+  }
 }
