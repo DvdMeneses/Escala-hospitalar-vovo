@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import './CadastrarAcompanhanteModal.css';
+import './ModalBase.css';
 
 export default function CadastrarAcompanhanteModal({ aberto, onCancelar, onSalvar }) {
     const [nome, setNome] = useState('');

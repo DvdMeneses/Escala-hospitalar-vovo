@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import '../cadastrarAcompanhante/CadastrarAcompanhanteModal.css';
+import './ModalBase.css';  // Todos importam o mesmo CSS
 
 const CadastrarIntervaloModal = ({ aberto, onCancelar, onSalvar, dia, acompanhantes }) => {
     const [inicio, setInicio] = useState('');

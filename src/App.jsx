@@ -3,21 +3,11 @@ import './App.css';
 import { ref, onValue, set } from "firebase/database";
 import { database } from "./firebase";
 import html2canvas from 'html2canvas';
-import CadastrarIntervaloModal from './components/cadastrarIntervaloModal/CadastrarIntervaloModal';
-import CadastrarAcompanhanteModal from './components/cadastrarAcompanhante/CadastrarAcompanhanteModal';
-
+import CadastrarIntervaloModal from './components/modals/CadastrarIntervaloModal';
+import CadastrarAcompanhanteModal from './components/modals/CadastrarAcompanhanteModal';
+import EditarCelulaModal from './components/modals/editarCelulaModal';
 const dias = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo'];
 const horas = Array.from({ length: 24 }, (_, i) => `${i.toString().padStart(2, '0')}:00`);
-
-const cores = {
-  Naldo: '#1e3a8a',
-  Sergio: '#22c55e',
-  Edna: '#ec4899',
-  Beto: '#f97316',
-  Simone: '#06b6d4',
-  Kellen: '#8b5cf6',
-  Edilene: '#ef4444',
-};
 
 function App() {
   const [escala, setEscala] = useState({});
@@ -25,6 +15,8 @@ function App() {
   const [modalAberto, setModalAberto] = useState(false);
   const [modalIntervaloAberto, setModalIntervaloAberto] = useState(false);
   const [diaSelecionado, setDiaSelecionado] = useState('');
+  const [modalCelulaAberto, setModalCelulaAberto] = useState(false);
+  const [celulaSelecionada, setCelulaSelecionada] = useState({ dia: '', hora: '' });
 
   useEffect(() => {
     // Carregar escala
@@ -64,14 +56,17 @@ function App() {
     });
   };
 
-  const salvarEscala = (dia, hora) => {
-    const nomeDigitado = prompt(`Quem estará disponível em ${dia} às ${hora}?`);
-    if (nomeDigitado) {
-      const nome = capitalizarNome(nomeDigitado);
-      const novaEscala = { ...escala, [`${dia}_${hora}`]: nome };
-      setEscala(novaEscala);
-      set(ref(database, "escala"), novaEscala);
-    }
+  // Substitua a função salvarEscala por esta:
+  const abrirModalCelula = (dia, hora) => {
+    setCelulaSelecionada({ dia, hora });
+    setModalCelulaAberto(true);
+  };
+
+  const salvarCelula = ({ dia, hora, nome }) => {
+    const novaEscala = { ...escala, [`${dia}_${hora}`]: nome };
+    setEscala(novaEscala);
+    set(ref(database, "escala"), novaEscala);
+    setModalCelulaAberto(false);
   };
 
   // Modal handlers
@@ -171,7 +166,7 @@ function App() {
                         color: nome ? '#fff' : '#000',
                         cursor: 'pointer',
                       }}
-                      onClick={() => salvarEscala(dia, hora)}
+                      onClick={() => abrirModalCelula(dia, hora)}  // Atualizado para abrirModalCelula
                     >
                       {nome}
                     </td>
@@ -194,6 +189,15 @@ function App() {
         onSalvar={salvarIntervalo}
         dia={diaSelecionado}
         acompanhantes={acompanhantes}
+      />
+      <EditarCelulaModal
+        aberto={modalCelulaAberto}
+        onCancelar={() => setModalCelulaAberto(false)}
+        onSalvar={salvarCelula}
+        dia={celulaSelecionada.dia}
+        hora={celulaSelecionada.hora}
+        acompanhantes={acompanhantes}
+        nomeAtual={escala[`${celulaSelecionada.dia}_${celulaSelecionada.hora}`] || ''}
       />
     </div>
   );
