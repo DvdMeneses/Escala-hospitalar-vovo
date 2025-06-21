@@ -137,7 +137,7 @@ function App() {
 
       <div className="action-buttons">
         <button onClick={abrirModal} className="btn-cadastrar-acompanhante">
-          + Cadastrar Acompanhante
+          Cadastrar Acompanhante
         </button>
       </div>
 
@@ -154,7 +154,7 @@ function App() {
                     onClick={() => abrirModalIntervalo(dia)}
                     title={`Cadastrar intervalo de horários para ${dia}`}
                   >
-                    + Cadastrar intervalo
+                    Cadastrar intervalo
                   </button>
                 </th>
               ))}
