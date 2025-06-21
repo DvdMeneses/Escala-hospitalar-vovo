@@ -1,45 +1,52 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './App.css';
 import { ref, onValue, set } from "firebase/database";
 import { database } from "./firebase";
 import html2canvas from 'html2canvas';
+
 import CadastrarIntervaloModal from './components/modals/CadastrarIntervaloModal';
 import CadastrarAcompanhanteModal from './components/modals/CadastrarAcompanhanteModal';
 import EditarCelulaModal from './components/modals/editarCelulaModal';
+
+// CONSTANTES
 const dias = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo'];
 const horas = Array.from({ length: 24 }, (_, i) => `${i.toString().padStart(2, '0')}:00`);
 
+// COMPONENTE PRINCIPAL
 function App() {
+  // STATES
   const [escala, setEscala] = useState({});
   const [acompanhantes, setAcompanhantes] = useState({});
   const [modalAberto, setModalAberto] = useState(false);
   const [modalIntervaloAberto, setModalIntervaloAberto] = useState(false);
-  const [diaSelecionado, setDiaSelecionado] = useState('');
   const [modalCelulaAberto, setModalCelulaAberto] = useState(false);
+  const [diaSelecionado, setDiaSelecionado] = useState('');
   const [celulaSelecionada, setCelulaSelecionada] = useState({ dia: '', hora: '' });
   const [hoveredCell, setHoveredCell] = useState(null);
+  const [exportando, setExportando] = useState(false);
 
+  const tabelaRef = useRef(null);
+
+  // EFFECTS
   useEffect(() => {
-    // Carregar escala
-    const escalaRef = ref(database, "escala");
-    onValue(escalaRef, (snapshot) => {
+    onValue(ref(database, "escala"), (snapshot) => {
       const data = snapshot.val();
       if (data) setEscala(data);
     });
 
-    // Carregar acompanhantes
-    const acompanhantesRef = ref(database, "acompanhantes");
-    onValue(acompanhantesRef, (snapshot) => {
+    onValue(ref(database, "acompanhantes"), (snapshot) => {
       const data = snapshot.val() || {};
       setAcompanhantes(data);
     });
   }, []);
 
-  const capitalizarNome = (nome) => {
-    return nome
-      .trim()
-      .toLowerCase()
-      .replace(/(?:^|\s)\S/g, letra => letra.toUpperCase());
+  // FUNÇÕES AUXILIARES
+  const capitalizarNome = (nome) =>
+    nome.trim().toLowerCase().replace(/(?:^|\s)\S/g, letra => letra.toUpperCase());
+
+  const getCor = (nome) => {
+    const encontrado = Object.values(acompanhantes).find(a => a.nome === nome);
+    return encontrado?.cor || '#e5e7eb';
   };
 
   const exportarComoImagem = () => {
@@ -57,7 +64,17 @@ function App() {
     });
   };
 
-  // Substitua a função salvarEscala por esta:
+  // FUNÇÕES DE AÇÃO
+  const abrirModal = () => setModalAberto(true);
+  const fecharModal = () => setModalAberto(false);
+
+  const abrirModalIntervalo = (dia) => {
+    setDiaSelecionado(dia);
+    setModalIntervaloAberto(true);
+  };
+
+  const fecharModalIntervalo = () => setModalIntervaloAberto(false);
+
   const abrirModalCelula = (dia, hora) => {
     setCelulaSelecionada({ dia, hora });
     setModalCelulaAberto(true);
@@ -68,19 +85,6 @@ function App() {
     setEscala(novaEscala);
     set(ref(database, "escala"), novaEscala);
     setModalCelulaAberto(false);
-  };
-
-  // Modal handlers
-  const abrirModal = () => setModalAberto(true);
-  const fecharModal = () => setModalAberto(false);
-
-  const abrirModalIntervalo = (dia) => {
-    setDiaSelecionado(dia);
-    setModalIntervaloAberto(true);
-  };
-
-  const fecharModalIntervalo = () => {
-    setModalIntervaloAberto(false);
   };
 
   const salvarIntervalo = ({ dia, inicio, fim, nome }) => {
@@ -95,11 +99,6 @@ function App() {
     setEscala(novaEscala);
     set(ref(database, "escala"), novaEscala);
     fecharModalIntervalo();
-  };
-
-  const getCor = (nome) => {
-    const encontrados = Object.values(acompanhantes).find(a => a.nome === nome);
-    return encontrados?.cor || '#e5e7eb';
   };
 
   const salvarAcompanhante = ({ nome, cor }) => {
@@ -125,32 +124,33 @@ function App() {
     setHoveredCell(null);
   };
 
+  // JSX
   return (
     <div className="container">
       <h1>Escala Hospitalar da Vovó</h1>
 
-      <div style={{ textAlign: 'center', marginBottom: '10px' }}>
-        <button onClick={exportarComoImagem} className="btn-exportar">
-          📸 Exportar Escala como Imagem
+      <div className="export-buttons">
+        <button onClick={exportarComoImagem} className="btn-exportar" disabled={exportando}>
+          {exportando ? 'Gerando Imagem...' : '📷 Exportar como Imagem'}
         </button>
       </div>
 
-      <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+      <div className="action-buttons">
         <button onClick={abrirModal} className="btn-cadastrar-acompanhante">
           + Cadastrar Acompanhante
         </button>
       </div>
 
-      <div className="tabela-scroll" style={{ overflowX: '50%', width: '100%' }}>
+      <div className="tabela-scroll" ref={tabelaRef}>
         <table>
           <thead>
             <tr>
               <th>Horário/Dia</th>
               {dias.map(dia => (
                 <th key={dia}>
-                  {dia}{' '}
+                  {dia}
                   <button
-                    style={{ marginLeft: 8, padding: '2px 6px', fontSize: '0.7rem' }}
+                    className="btn-intervalo"
                     onClick={() => abrirModalIntervalo(dia)}
                     title={`Cadastrar intervalo de horários para ${dia}`}
                   >
@@ -173,8 +173,6 @@ function App() {
                       style={{
                         backgroundColor: nome ? getCor(nome) : '#fff',
                         color: nome ? '#fff' : '#000',
-                        cursor: 'pointer',
-                        position: 'relative'
                       }}
                       onClick={() => abrirModalCelula(dia, hora)}
                       onMouseEnter={() => setHoveredCell(nome ? key : null)}
@@ -202,11 +200,13 @@ function App() {
         </table>
       </div>
 
+      {/* MODAIS */}
       <CadastrarAcompanhanteModal
         aberto={modalAberto}
         onCancelar={fecharModal}
         onSalvar={salvarAcompanhante}
       />
+
       <CadastrarIntervaloModal
         aberto={modalIntervaloAberto}
         onCancelar={fecharModalIntervalo}
@@ -214,6 +214,7 @@ function App() {
         dia={diaSelecionado}
         acompanhantes={acompanhantes}
       />
+
       <EditarCelulaModal
         aberto={modalCelulaAberto}
         onCancelar={() => setModalCelulaAberto(false)}
