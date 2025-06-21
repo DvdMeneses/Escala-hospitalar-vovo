@@ -129,14 +129,14 @@ function App() {
     <div className="container">
       <h1>Escala Hospitalar da Vovó</h1>
 
-      <div className="export-buttons">
-        <button onClick={exportarComoImagem} className="btn-exportar" disabled={exportando}>
+      <div className="action-buttons">
+        <button onClick={exportarComoImagem} className="btn-actions" disabled={exportando}>
           {exportando ? 'Gerando Imagem...' : '📷 Exportar como Imagem'}
         </button>
       </div>
 
       <div className="action-buttons">
-        <button onClick={abrirModal} className="btn-cadastrar-acompanhante">
+        <button onClick={abrirModal} className="btn-actions">
           Cadastrar Acompanhante
         </button>
       </div>
